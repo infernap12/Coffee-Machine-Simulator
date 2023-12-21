@@ -1,15 +1,18 @@
 package machine;
 
-import java.util.List;
-
 public class Drink {
+    int menuIndex;
     String name;
-    List<Ingredient> ingredients;
+    int price;
+    Ingredient[] ingredients;
 
-    public Drink(String name, List<Ingredient> ingredients) {
+    public Drink(int menuIndex, String name, int price, Ingredient... ingredients) {
         this.name = name;
+        this.price = price;
+        this.menuIndex = menuIndex;
         this.ingredients = ingredients;
     }
+
     public int getAmount(IngredientType ingredientName) {
         for (Ingredient ingredient : ingredients) {
             if (ingredient.getName().equals(ingredientName.getName())) {
@@ -18,14 +21,16 @@ public class Drink {
         }
         return 0;
     }
+
     public String getUnit(IngredientType ingredientName) {
         for (Ingredient ingredient : ingredients) {
             if (ingredient.getName().equals(ingredientName.getName())) {
-                return ingredient.getUnit();
+                return ingredient.getAmountUnit();
             }
         }
         return "0";
     }
+
     public String getName(IngredientType ingredientName) {
         for (Ingredient ingredient : ingredients) {
             if (ingredient.getName().equals(ingredientName.getName())) {
@@ -33,5 +38,9 @@ public class Drink {
             }
         }
         return "0";
+    }
+
+    String getMenuString() {
+        return "%d - %s".formatted(this.menuIndex,this.name);
     }
 }
