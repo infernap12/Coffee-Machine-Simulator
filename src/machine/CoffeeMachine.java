@@ -1,5 +1,6 @@
 package machine;
 
+import static machine.CoffeeMachine.drinksMenu.Menu;
 import static machine.CoffeeMachine.drinksMenu.drinksMenuInit;
 import static machine.IngredientType.*;
 
@@ -12,10 +13,8 @@ public class CoffeeMachine {
     public static Ingredient[] tank = {waterTank,milkTank,coffeeTank,moneyTank,cupTank};
     public static void main(String[] args) {
         drinksMenuInit();
-        printStatus(waterTank,milkTank,coffeeTank,cupTank,moneyTank);
         //while true *menu* will go here
         userMenu();
-        printStatus(waterTank,milkTank,coffeeTank,cupTank,moneyTank);
 //        System.out.println("Write how many ml of water the coffee machine has:");
 //        int water = scanner.nextInt();//waterTank.amount;
 //        System.out.println("Write how many ml of milk the coffee machine has:");
@@ -45,45 +44,80 @@ public class CoffeeMachine {
     }
 
     private static void userMenu() {
-        System.out.println("Write action (buy, fill, take): ");
-       String action = InputUtils.getString("buy","fill","take");
-        switch (action) {
-            case "buy" -> buyMenu();
-            case "fill" -> refill(waterTank,milkTank,coffeeTank,cupTank);
-            case "take" -> {
-                System.out.println("I gave you " + moneyTank.getAmountUnit());
-                moneyTank.take(moneyTank.amount);
+        while (true) {
+            System.out.println("Write action (buy, fill, take, remaining, exit): ");
+            String action = InputUtils.getString("buy","fill","take","remaining","exit");
+            System.out.println();
+            switch (action) {
+                case "buy" -> buyMenu();
+                case "fill" -> refill(waterTank,milkTank,coffeeTank,cupTank);
+                case "take" -> {
+                    System.out.println("I gave you " + moneyTank.getAmountUnit());
+                    moneyTank.take(moneyTank.amount);
+                }
+                case "remaining" -> printStatus(waterTank,milkTank,coffeeTank,cupTank,moneyTank);
+                case "exit" -> {
+                    return;
+                }
             }
+            System.out.println();
         }
     }
 
     private static void buyMenu() {
         System.out.println("What do you want to buy? 1 - espresso, 2 - latte, 3 - cappuccino:");
-        int input = InputUtils.getClampedInt(1, 3);
-        for (Drink drink : drinksMenu.Menu) {
-            if (drink.menuIndex == input) {
-                for (Ingredient ingredient : drink.ingredients) {
-                    for (Ingredient tank : tank) {
-                        if (ingredient.equals(tank)) {
-                            tank.take(ingredient.amount);
-                        }
-                    }
+        String input = InputUtils.getString("1","2","3","back");
+        switch (input) {
+            case "1", "2", "3" -> {
+                int i = Integer.parseInt(input);
+               Drink drink = Menu[i-1];
+                if (testTank(drink)) {
+                    makeCoffee(drink);
                 }
-                moneyTank.add(drink.price);
-                cupTank.take(1);
+            }
+            case "back" -> {
             }
         }
+    }
+
+    private static boolean testTank(Drink drink) {
+        for (Ingredient ing : drink.ingredients) {
+            for (Ingredient tankIng : tank) {
+                if (tankIng.equals(ing)) {
+                    if (tankIng.amount < ing.amount) {
+                        System.out.printf("Sorry, not enough %s!%n", tankIng.getName());
+                        return false;
+                    }
+                    break;
+                }
+            }
+        }
+        return true;
+    }
+
+    private static void makeCoffee(Drink drink) {
+        for (Ingredient ingredient : drink.ingredients) {
+            for (Ingredient tank : tank) {
+                if (ingredient.equals(tank)) {
+                    tank.take(ingredient.amount);
+                    break;
+                }
+            }
+        }
+        moneyTank.add(drink.price);
+        cupTank.take(1);
+        System.out.println("I have enough resources, making you a coffee!");
     }
 
     private static void refill(Ingredient... args) {
         for (Ingredient arg : args) {
             System.out.printf("Write how many %s you want to add:%n", arg.getLongDisplayString());
-            int input = InputUtils.getClampedInt(1,Integer.MAX_VALUE-arg.amount);
+            int input = InputUtils.getClampedInt(0,Integer.MAX_VALUE-arg.amount);
             arg.add(input);
         }
     }
 
-    static void printStatus(Ingredient... args) {
+    private static void printStatus(Ingredient... args) {
         System.out.println("The coffee machine has:");
         for (Ingredient arg : args) {
             System.out.println(arg.getDisplayString());
