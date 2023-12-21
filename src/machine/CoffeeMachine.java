@@ -117,9 +117,6 @@ public class CoffeeMachine {
             Menu = new Drink[]{ESPRESSO, LATTE, CAPPUCCINO};
 
         }
-//        public static int getAmount(Drink drink, IngredientType ingredientName) {
-//            return drink.getAmount(ingredientName);
-//        }
     }
 }
 //Large amount of over prep in preparation for insanity.
